@@ -13,8 +13,12 @@ import ManageProfessional from './pages/admin/ManageProfessional';
 import ManageCertifications from './pages/admin/ManageCertifications';
 
 export default function App() {
+  // BASE_URL is provided by Vite from `base` in vite.config.ts (driven by
+  // VITE_BASE_PATH). It looks like "/" or "/speakerporfolioresume/" — strip
+  // the trailing slash to get a valid React Router basename.
+  const basename = import.meta.env.BASE_URL.replace(/\/$/, '') || '/';
   return (
-    <BrowserRouter>
+    <BrowserRouter basename={basename}>
       <div className="min-h-screen bg-slate-900 text-slate-100 flex flex-col">
         <Navbar />
         <main className="flex-1">

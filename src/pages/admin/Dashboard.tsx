@@ -1,10 +1,102 @@
+import { useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { User, Mic, Briefcase, Award, ChevronRight, BarChart3 } from 'lucide-react';
-import { useStore } from '../../store';
+import {
+  User,
+  Mic,
+  Briefcase,
+  Award,
+  ChevronRight,
+  BarChart3,
+  Download,
+  Upload,
+  RotateCcw,
+  CheckCircle2,
+  AlertCircle,
+} from 'lucide-react';
+import { useStore, PortfolioData } from '../../store';
 
 export default function Dashboard() {
-  const { profile, speakerExperiences, professionalExperiences, certifications } = useStore();
+  const {
+    profile,
+    speakerExperiences,
+    professionalExperiences,
+    certifications,
+    exportData,
+    importData,
+    resetToDefaults,
+  } = useStore();
+
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const [feedback, setFeedback] = useState<{ type: 'success' | 'error'; message: string } | null>(
+    null
+  );
+
+  const showFeedback = (type: 'success' | 'error', message: string) => {
+    setFeedback({ type, message });
+    window.setTimeout(() => setFeedback(null), 5000);
+  };
+
+  const handleExport = () => {
+    try {
+      const json = exportData();
+      const blob = new Blob([json], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = 'portfolio.json';
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
+      showFeedback(
+        'success',
+        'portfolio.json downloaded. Replace src/data/portfolio.json with it, then commit & push to git.'
+      );
+    } catch {
+      showFeedback('error', 'Failed to export portfolio content.');
+    }
+  };
+
+  const handleImportClick = () => {
+    fileInputRef.current?.click();
+  };
+
+  const handleImportFile = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    event.target.value = '';
+    if (!file) return;
+    try {
+      const text = await file.text();
+      const parsed = JSON.parse(text) as Partial<PortfolioData>;
+      if (
+        !parsed ||
+        typeof parsed !== 'object' ||
+        !parsed.profile ||
+        !Array.isArray(parsed.speakerExperiences) ||
+        !Array.isArray(parsed.professionalExperiences) ||
+        !Array.isArray(parsed.certifications)
+      ) {
+        showFeedback('error', 'Invalid portfolio.json: missing required fields.');
+        return;
+      }
+      importData(parsed as PortfolioData);
+      showFeedback('success', 'Portfolio content imported successfully.');
+    } catch {
+      showFeedback('error', 'Failed to import file: not valid JSON.');
+    }
+  };
+
+  const handleReset = () => {
+    if (
+      window.confirm(
+        'Reset all portfolio content to the defaults bundled with the app (from src/data/portfolio.json)? Unsaved local edits will be lost.'
+      )
+    ) {
+      resetToDefaults();
+      showFeedback('success', 'Portfolio content reset to defaults from portfolio.json.');
+    }
+  };
 
   const sections = [
     {
@@ -92,6 +184,73 @@ export default function Dashboard() {
             </motion.div>
           ))}
         </div>
+
+        {/* Persistence / git workflow */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.4 }}
+          className="mt-8 p-6 bg-slate-800 border border-slate-700 rounded-2xl"
+        >
+          <h2 className="font-semibold text-white mb-2">Persist content to git</h2>
+          <p className="text-slate-400 text-sm mb-4">
+            Edits you make here are kept locally in memory only. To make them part of the deployed
+            site, export the JSON, replace
+            <code className="mx-1 px-1.5 py-0.5 rounded bg-slate-900 text-teal-300">src/data/portfolio.json</code>
+            with the downloaded file, then commit and push to git.
+          </p>
+
+          <div className="flex flex-wrap gap-3">
+            <button
+              type="button"
+              onClick={handleExport}
+              className="inline-flex items-center gap-2 px-4 py-2.5 bg-teal-500 hover:bg-teal-600 text-white text-sm font-semibold rounded-xl transition-all hover:shadow-lg hover:shadow-teal-500/25"
+            >
+              <Download size={16} />
+              Export JSON
+            </button>
+            <button
+              type="button"
+              onClick={handleImportClick}
+              className="inline-flex items-center gap-2 px-4 py-2.5 bg-indigo-500 hover:bg-indigo-600 text-white text-sm font-semibold rounded-xl transition-all"
+            >
+              <Upload size={16} />
+              Import JSON
+            </button>
+            <button
+              type="button"
+              onClick={handleReset}
+              className="inline-flex items-center gap-2 px-4 py-2.5 bg-slate-700 hover:bg-slate-600 text-slate-200 text-sm font-semibold rounded-xl transition-all"
+            >
+              <RotateCcw size={16} />
+              Reset to portfolio.json
+            </button>
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept="application/json,.json"
+              className="hidden"
+              onChange={handleImportFile}
+            />
+          </div>
+
+          {feedback && (
+            <div
+              className={`mt-4 flex items-start gap-2 p-3 rounded-xl text-sm border ${
+                feedback.type === 'success'
+                  ? 'bg-teal-500/10 border-teal-500/30 text-teal-300'
+                  : 'bg-red-500/10 border-red-500/30 text-red-300'
+              }`}
+            >
+              {feedback.type === 'success' ? (
+                <CheckCircle2 size={16} className="mt-0.5 shrink-0" />
+              ) : (
+                <AlertCircle size={16} className="mt-0.5 shrink-0" />
+              )}
+              <span>{feedback.message}</span>
+            </div>
+          )}
+        </motion.div>
       </div>
     </div>
   );

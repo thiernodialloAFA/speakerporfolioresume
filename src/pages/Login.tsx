@@ -113,9 +113,14 @@ export default function Login() {
           </form>
 
           <div className="mt-6 p-4 bg-slate-700/50 rounded-xl text-center">
-            <p className="text-xs text-slate-400 font-medium mb-1">Demo Credentials</p>
-            <p className="text-xs text-slate-300">admin@portfolio.com</p>
-            <p className="text-xs text-slate-300">Admin@2024</p>
+            <p className="text-xs text-slate-400 font-medium mb-1">Admin access</p>
+            <p className="text-xs text-slate-300">
+              Credentials are configured via the
+              <code className="mx-1 px-1 py-0.5 rounded bg-slate-800 text-teal-300">VITE_ADMIN_EMAIL</code>
+              and
+              <code className="mx-1 px-1 py-0.5 rounded bg-slate-800 text-teal-300">VITE_ADMIN_PASSWORD</code>
+              environment variables at build time.
+            </p>
           </div>
         </div>
       </motion.div>
