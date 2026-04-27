@@ -8,6 +8,20 @@
   </head>
   <body>
     <div id="root"></div>
+    <script>
+      // Counterpart to public/404.html for the GitHub Pages SPA fallback:
+      // restore the original path before React Router boots.
+      (function () {
+        var l = window.location;
+        var params = new URLSearchParams(l.search);
+        var p = params.get('p');
+        if (p) {
+          var q = params.get('q');
+          var search = q ? '?' + q : '';
+          window.history.replaceState(null, '', l.pathname.replace(/\/$/, '') + p + search + l.hash);
+        }
+      })();
+    </script>
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>

@@ -1,0 +1,23 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Redirecting…</title>
+    <script>
+      // SPA fallback for GitHub Pages: GitHub Pages serves this 404 page for
+      // any path it doesn't recognise. We redirect to the site root and pass
+      // the original path/query/hash through the URL hash, so index.html can
+      // restore it before React Router takes over.
+      (function () {
+        var l = window.location;
+        var basePath = l.pathname.split('/').slice(0, 2).join('/') + '/';
+        var rest = l.pathname.slice(basePath.length);
+        l.replace(
+          l.protocol + '//' + l.host + basePath + '?p=/' + rest +
+          (l.search ? '&q=' + l.search.slice(1) : '') + l.hash
+        );
+      })();
+    </script>
+  </head>
+  <body></body>
+</html>
