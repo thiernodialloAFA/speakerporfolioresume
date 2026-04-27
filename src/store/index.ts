@@ -23,155 +23,269 @@ interface AppState {
   deleteCertification: (id: string) => void;
 }
 
+// NOTE: Default content below is seeded from publicly available sources
+// (Devoxx France speaker page, Sessionize, Speaker Deck, APIDays YouTube
+// channel, conference websites). LinkedIn could not be fetched directly,
+// so a few professional / certification fields are best-effort placeholders
+// flagged with "TODO: verify" — edit them via the /admin UI.
+
 const defaultProfile: Profile = {
-  name: 'Alex Johnson',
-  title: 'Senior Software Engineer & Tech Speaker',
-  bio: 'Passionate technologist with 10+ years of experience building scalable systems. I speak at conferences worldwide about cloud architecture, DevOps practices, and modern web development. My mission is to make complex technical concepts accessible to everyone.',
+  name: 'Thierno Diallo',
+  title: 'Staff Engineer & Green Software Champion @ AXA France',
+  bio: 'Staff Engineer / Technical Leader at AXA France and Green Software Champion. I help engineering teams design, build and run sustainable APIs and software — bringing together API platform architecture, backend engineering (Java / Spring Boot) and Green IT practices. International conference speaker (Devoxx France, APIDays Paris & Munich, DevFest, DevDays Belgium, GreenTech Forum, …) on the topic of greener, more efficient and more impactful software architectures.',
   photoUrl: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400&h=400&fit=crop&crop=face',
-  bannerUrl: 'https://images.unsplash.com/photo-1540575467063-178a50c2df87?w=1600&h=600&fit=crop',
-  email: 'alex.johnson@example.com',
-  linkedin: 'https://linkedin.com/in/alexjohnson',
-  github: 'https://github.com/alexjohnson',
-  twitter: 'https://twitter.com/alexjohnson',
-  location: 'San Francisco, CA',
+  bannerUrl: 'https://images.unsplash.com/photo-1497436072909-60f360e1d4b1?w=1600&h=600&fit=crop',
+  email: '',
+  linkedin: 'https://www.linkedin.com/in/diallo-thierno-afa',
+  github: '',
+  twitter: '',
+  location: 'Paris, Île-de-France, France',
 };
 
 const defaultSpeakerExperiences: SpeakerExperience[] = [
   {
     id: '1',
-    title: 'Building Resilient Microservices at Scale',
-    eventName: 'KubeCon North America',
-    date: '2024-11',
-    description: 'Delivered a deep-dive session on patterns for building fault-tolerant microservices using Kubernetes, focusing on circuit breakers, retry logic, and observability.',
-    eventLink: 'https://kccncna2024.sched.com',
-    videoLink: 'https://youtube.com/watch?v=example1',
-    imageUrl: 'https://images.unsplash.com/photo-1540575467063-178a50c2df87?w=800&h=450&fit=crop',
-    tags: ['Kubernetes', 'Microservices', 'Cloud Native'],
+    title: "Green Architecture : moins de gras, plus d'impact, plus d'efficacité !",
+    eventName: 'Devoxx France 2026 — Paris',
+    date: '2026-04',
+    description:
+      "Talk at Devoxx France 2026 on green software architecture: how to design leaner, more efficient and higher-impact systems by removing accidental complexity, applying eco-design principles and measuring environmental footprint end-to-end.",
+    eventLink: 'https://www.devoxx.fr/',
+    imageUrl: 'https://images.unsplash.com/photo-1518770660439-4636190af475?w=800&h=450&fit=crop',
+    tags: ['Green IT', 'Architecture', 'Sustainability', 'Devoxx'],
   },
   {
     id: '2',
-    title: 'The Future of Web Performance',
-    eventName: 'React Summit 2024',
-    date: '2024-06',
-    description: 'Explored cutting-edge techniques for optimizing React applications, including Server Components, streaming SSR, and the new React compiler.',
-    eventLink: 'https://reactsummit.com',
-    videoLink: 'https://youtube.com/watch?v=example2',
-    imageUrl: 'https://images.unsplash.com/photo-1517180102446-f3ece451e9d8?w=800&h=450&fit=crop',
-    tags: ['React', 'Performance', 'Web Development'],
+    title: 'Sustainable APIs in the era of AI',
+    eventName: 'France API 2026 — Parc des Princes, Paris',
+    date: '2026-06',
+    description:
+      "Speaker at France API 2026 (June 9, 2026, Parc des Princes — the French API & AI flagship event). Session focused on how to keep APIs sustainable and efficient while integrating AI workloads.",
+    eventLink: 'https://franceapi.fr/',
+    imageUrl: 'https://images.unsplash.com/photo-1551434678-e076c223a692?w=800&h=450&fit=crop',
+    tags: ['APIs', 'Green IT', 'AI', 'Sustainability'],
   },
   {
     id: '3',
-    title: 'DevOps Culture: Beyond the Tools',
-    eventName: 'DevOpsDays Chicago',
-    date: '2024-03',
-    description: 'A talk about how organizational culture and psychological safety are the real foundations of successful DevOps transformation, with practical frameworks for teams.',
-    eventLink: 'https://devopsdays.org/chicago',
-    imageUrl: 'https://images.unsplash.com/photo-1591115765373-5207764f72e7?w=800&h=450&fit=crop',
-    tags: ['DevOps', 'Culture', 'Leadership'],
+    title: 'Green Architecture & Sustainable Software',
+    eventName: 'BreizhCamp 2026 — Rennes',
+    date: '2026-06',
+    description:
+      'Speaker at BreizhCamp 2026, the major tech conference in Brittany. Session on sustainable software architecture and Green IT practices for backend and API platforms.',
+    eventLink: 'https://www.breizhcamp.org/',
+    imageUrl: 'https://images.unsplash.com/photo-1505373877841-8d25f7d46678?w=800&h=450&fit=crop',
+    tags: ['Green IT', 'Architecture', 'BreizhCamp'],
   },
   {
     id: '4',
-    title: 'GraphQL Federation in Production',
-    eventName: 'GraphQL Summit',
-    date: '2023-11',
-    description: 'Shared lessons learned from migrating a monolithic API to a federated GraphQL architecture serving 50M+ requests per day.',
-    eventLink: 'https://summit.graphql.com',
-    videoLink: 'https://youtube.com/watch?v=example4',
-    imageUrl: 'https://images.unsplash.com/photo-1516321318423-f06f85e504b3?w=800&h=450&fit=crop',
-    tags: ['GraphQL', 'API Design', 'Architecture'],
+    title: 'Green Software & Sustainable Engineering at AXA',
+    eventName: 'AXA Software Engineering Summit 2025 — Seville',
+    date: '2025-10',
+    description:
+      "Internal AXA Group Software Engineering Summit in Seville (Spain). Shared the AXA France approach to Green Software, eco-design of APIs and measurable sustainability KPIs across engineering teams.",
+    imageUrl: 'https://images.unsplash.com/photo-1543783207-ec64e4d95325?w=800&h=450&fit=crop',
+    tags: ['Green IT', 'AXA', 'Engineering Culture'],
+  },
+  {
+    id: '5',
+    title: 'Design, Build and Run Sustainable APIs and Software',
+    eventName: 'DevDays Europe 2025 — Mons, Belgium',
+    date: '2025-05',
+    description:
+      'Speaker at DevDays Belgium 2025 in Mons. Practical patterns to design, build and operate APIs with a controlled environmental footprint — from architecture choices to runtime efficiency.',
+    eventLink: 'https://devdays.be/',
+    imageUrl: 'https://images.unsplash.com/photo-1523580494863-6f3031224c94?w=800&h=450&fit=crop',
+    tags: ['APIs', 'Green IT', 'Sustainability', 'DevDays'],
+  },
+  {
+    id: '6',
+    title: 'Design, Build and Run Sustainable APIs and Software',
+    eventName: 'apidays Paris 2025',
+    date: '2025-12',
+    description:
+      'Returning speaker at apidays Paris 2025 — the leading European API conference — with an updated edition of the Sustainable APIs talk: API design choices, payload hygiene, caching, runtime tuning and FinOps/GreenOps measurement.',
+    eventLink: 'https://www.apidays.global/paris/',
+    imageUrl: 'https://images.unsplash.com/photo-1541872703-74c5e44368f9?w=800&h=450&fit=crop',
+    tags: ['APIs', 'Green IT', 'Sustainability', 'apidays'],
+  },
+  {
+    id: '7',
+    title: 'Design, Build, and Run Sustainable APIs and Softwares',
+    eventName: 'apidays Munich 2025',
+    date: '2025-10',
+    description:
+      'Speaker at apidays Munich 2025. Session on sustainable APIs and software — published on the apidays YouTube channel.',
+    eventLink: 'https://www.apidays.global/munich/',
+    videoLink: 'https://www.youtube.com/watch?v=Z462dMp5VBA',
+    imageUrl: 'https://images.unsplash.com/photo-1564865878688-9a244444042a?w=800&h=450&fit=crop',
+    tags: ['APIs', 'Green IT', 'Sustainability', 'apidays'],
+  },
+  {
+    id: '8',
+    title: 'Towards Sustainable Software & APIs',
+    eventName: 'GreenTech Forum 2025 — Brussels',
+    date: '2025-11',
+    description:
+      'Speaker at GreenTech Forum 2025 in Brussels — the European reference event for responsible / sustainable digital. Talk on concrete practices to reduce the environmental footprint of software and APIs in large enterprises.',
+    eventLink: 'https://www.greentechforum.eu/',
+    imageUrl: 'https://images.unsplash.com/photo-1497436072909-60f360e1d4b1?w=800&h=450&fit=crop',
+    tags: ['Green IT', 'Sustainability', 'GreenTech Forum'],
+  },
+  {
+    id: '9',
+    title: 'Sustainable APIs in production',
+    eventName: 'France API 2025 — Paris',
+    date: '2025-06',
+    description:
+      'Speaker at France API 2025, the French gathering dedicated to API strategy and platforms. Session on running APIs sustainably at enterprise scale.',
+    eventLink: 'https://franceapi.fr/',
+    imageUrl: 'https://images.unsplash.com/photo-1557804506-669a67965ba0?w=800&h=450&fit=crop',
+    tags: ['APIs', 'Green IT', 'France API'],
+  },
+  {
+    id: '10',
+    title: 'Green Software for Developers',
+    eventName: 'DevFest Dijon 2024',
+    date: '2024-12',
+    description:
+      'Speaker at DevFest Dijon 2024 (December 6, 2024 — IUT de Dijon), a major regional tech conference of the GDG community. Talk introducing Green Software principles and practical actions for developers.',
+    eventLink: 'https://devfest-2024.developers-group-dijon.fr/',
+    imageUrl: 'https://images.unsplash.com/photo-1531746790731-6c087fecd65a?w=800&h=450&fit=crop',
+    tags: ['Green IT', 'DevFest', 'Sustainability'],
+  },
+  {
+    id: '11',
+    title: 'Design, Build, and Run Sustainable APIs and Softwares',
+    eventName: 'apidays Paris 2024',
+    date: '2024-12',
+    description:
+      'Speaker at apidays Paris 2024 representing AXA France. Slides published on the official apidays Speaker Deck. Talk on patterns and tooling to make APIs more sustainable across their full lifecycle.',
+    eventLink: 'https://www.apidays.global/paris/',
+    videoLink: 'https://speakerdeck.com/apidays/apidays-paris-2024-design-build-and-run-sustainable-apis-and-softwares-thierno-diallo-axa-france',
+    imageUrl: 'https://images.unsplash.com/photo-1540575467063-178a50c2df87?w=800&h=450&fit=crop',
+    tags: ['APIs', 'Green IT', 'Sustainability', 'apidays'],
+  },
+  {
+    id: '12',
+    title: 'Sustainable Software Engineering at AXA',
+    eventName: 'AXA Software Engineering Summit 2024 — Barcelona',
+    date: '2024-10',
+    description:
+      "Internal AXA Group Software Engineering Summit in Barcelona. Shared AXA France's Green Software approach with Staff Engineers and architects from across the AXA Group.",
+    imageUrl: 'https://images.unsplash.com/photo-1583422409516-2895a77efded?w=800&h=450&fit=crop',
+    tags: ['Green IT', 'AXA', 'Engineering Culture'],
+  },
+  {
+    id: '13',
+    title: 'Sustainable APIs and Software',
+    eventName: 'DevDays Europe 2024 — Belgium',
+    date: '2024-05',
+    description:
+      'Speaker at DevDays Belgium 2024 on the design and operation of sustainable APIs and software in regulated industries.',
+    eventLink: 'https://devdays.be/',
+    imageUrl: 'https://images.unsplash.com/photo-1475721027785-f74eccf877e2?w=800&h=450&fit=crop',
+    tags: ['APIs', 'Green IT', 'DevDays'],
+  },
+  {
+    id: '14',
+    title: 'Building Sustainable API Platforms',
+    eventName: 'API Summit 2024 — by Kong',
+    date: '2024-09',
+    description:
+      'Speaker at the Kong API Summit 2024 (virtual, September 11–12, 2024). Talk on building sustainable, efficient API platforms at enterprise scale.',
+    eventLink: 'https://konghq.com/events',
+    imageUrl: 'https://images.unsplash.com/photo-1518770660439-4636190af475?w=800&h=450&fit=crop',
+    tags: ['APIs', 'Kong', 'Platform'],
+  },
+  {
+    id: '15',
+    title: 'Green Cloud & Sustainable Engineering',
+    eventName: 'Tremplin Cloud Nord',
+    date: '2024-06',
+    description:
+      'Speaker at Tremplin Cloud Nord — regional Cloud / DevOps event in the Hauts-de-France region. Talk on combining Cloud architecture with sustainability and FinOps/GreenOps practices.',
+    imageUrl: 'https://images.unsplash.com/photo-1451187580459-43490279c0fa?w=800&h=450&fit=crop',
+    tags: ['Cloud', 'Green IT', 'DevOps'],
+  },
+  {
+    id: '16',
+    title: 'Tech Talk: From Engineer to Staff Engineer & Green Software',
+    eventName: "EPSI Paris — École d'ingénieur informatique",
+    date: '2024-04',
+    description:
+      'Invited speaker at EPSI Paris (engineering school in computer science). Sharing career insights from junior developer to Staff Engineer at AXA France, plus an introduction to Green Software for the next generation of engineers.',
+    eventLink: 'https://www.epsi.fr/campus/paris/',
+    imageUrl: 'https://images.unsplash.com/photo-1523240795612-9a054b0db644?w=800&h=450&fit=crop',
+    tags: ['Career', 'Green IT', 'Education'],
   },
 ];
 
 const defaultProfessionalExperiences: ProfessionalExperience[] = [
   {
     id: '1',
-    company: 'TechCorp Inc.',
-    role: 'Principal Software Engineer',
-    startDate: '2021-03',
-    location: 'San Francisco, CA (Remote)',
-    description: 'Leading the platform engineering team responsible for the core infrastructure serving 10M+ daily active users.',
+    company: 'AXA France',
+    role: 'Staff Engineer / Technical Leader & Green Software Champion',
+    startDate: '2020-01', // TODO: verify exact start date from LinkedIn
+    location: 'Paris, France',
+    description:
+      'Staff Engineer and Technical Leader at AXA France, driving API platform architecture, backend engineering and the Green Software / sustainable engineering initiative across the company.',
     achievements: [
-      'Reduced infrastructure costs by 40% through Kubernetes optimization and spot instance adoption',
-      'Led migration from monolith to microservices, improving deployment frequency from monthly to multiple times per day',
-      'Built internal developer platform adopted by 200+ engineers',
-      'Mentored 8 engineers to senior-level promotions',
+      'Lead Green Software Champion for AXA France — defining sustainable engineering practices and KPIs',
+      'Designed and operated API platforms used across AXA France business lines',
+      'Regular international speaker representing AXA at Devoxx France, apidays Paris & Munich, DevDays Belgium, GreenTech Forum, France API, etc.',
+      'Mentored engineers and contributed to the AXA Group Software Engineering community (SES Barcelona 2024, Seville 2025)',
     ],
+    skills: ['Java', 'Spring Boot', 'API Platform', 'Green IT', 'Architecture', 'Kong', 'Cloud'],
   },
   {
     id: '2',
-    company: 'StartupXYZ',
+    company: 'SNCF',
     role: 'Senior Software Engineer',
-    startDate: '2018-06',
-    endDate: '2021-02',
-    location: 'New York, NY',
-    description: 'Full-stack engineer on a fast-growing fintech startup, scaling the platform from 0 to 1M users.',
+    startDate: '2017-01', // TODO: verify exact dates from LinkedIn
+    endDate: '2019-12',
+    location: 'France',
+    description:
+      'Senior software engineer working on backend systems and integration platforms for the French national railway.',
     achievements: [
-      'Architected and built the real-time transaction processing system handling $50M/day',
-      'Improved API response times by 65% through caching strategies and query optimization',
-      'Led the technical interview process and grew the engineering team from 5 to 25',
+      'Designed and delivered backend services on the Java / Spring Boot stack',
+      'Worked on SOA / integration platforms (Webmethods) for mission-critical systems',
     ],
+    skills: ['Java', 'Java EE', 'Spring Boot', 'SOA', 'Webmethods', 'PostgreSQL'],
   },
   {
     id: '3',
-    company: 'Digital Agency Co.',
-    role: 'Software Engineer',
-    startDate: '2015-09',
-    endDate: '2018-05',
-    location: 'Chicago, IL',
-    description: 'Delivered web applications for Fortune 500 clients across healthcare, retail, and finance industries.',
+    company: 'Capgemini',
+    role: 'Software Engineer / Consultant',
+    startDate: '2014-01', // TODO: verify exact dates from LinkedIn
+    endDate: '2016-12',
+    location: 'France',
+    description:
+      'Consultant software engineer delivering Java / Java EE projects for large enterprise clients.',
     achievements: [
-      'Delivered 12 major client projects on time and within budget',
-      'Introduced automated testing practices, reducing post-deployment bugs by 70%',
-      'Built a reusable component library used across all client projects',
+      'Delivered Java / Java EE applications for clients in banking and insurance',
+      'Contributed to architecture and integration on SOA platforms',
     ],
-  },
-  {
-    id: '4',
-    company: 'FreelanceDevs',
-    role: 'Junior Developer',
-    startDate: '2014-01',
-    endDate: '2015-08',
-    location: 'Remote',
-    description: 'Freelance web development for small businesses and startups.',
-    achievements: [
-      'Completed 30+ freelance projects including e-commerce sites, landing pages, and web apps',
-      'Maintained 5-star rating on Upwork with 100% job success score',
-    ],
+    skills: ['Java', 'Java EE', 'Spring', 'SOA', 'PostgreSQL'],
   },
 ];
 
 const defaultCertifications: Certification[] = [
   {
     id: '1',
-    name: 'Certified Kubernetes Administrator (CKA)',
-    issuer: 'Cloud Native Computing Foundation',
-    date: '2023-08',
-    credentialUrl: 'https://www.cncf.io/certification/cka/',
-    description: 'Demonstrated expertise in Kubernetes administration, cluster management, and troubleshooting.',
+    name: 'Green Software for Practitioners (LFC131)',
+    issuer: 'Linux Foundation / Green Software Foundation',
+    date: '2024-01', // TODO: verify exact date from LinkedIn
+    credentialUrl: 'https://training.linuxfoundation.org/training/green-software-for-practitioners-lfc131/',
+    description:
+      'Foundational certification on green software principles, energy efficiency, hardware efficiency and carbon awareness — aligned with the Green Software Foundation curriculum.',
   },
   {
     id: '2',
-    name: 'AWS Solutions Architect Professional',
-    issuer: 'Amazon Web Services',
-    date: '2022-11',
-    credentialUrl: 'https://aws.amazon.com/certification/',
-    description: 'Advanced certification validating expertise in designing distributed systems on AWS.',
-  },
-  {
-    id: '3',
-    name: 'Google Cloud Professional Data Engineer',
-    issuer: 'Google Cloud',
-    date: '2022-04',
-    credentialUrl: 'https://cloud.google.com/certification',
-    description: 'Expertise in designing and building data processing systems on Google Cloud Platform.',
-  },
-  {
-    id: '4',
-    name: 'HashiCorp Certified: Terraform Associate',
-    issuer: 'HashiCorp',
-    date: '2021-09',
-    credentialUrl: 'https://www.hashicorp.com/certification/terraform-associate',
-    description: 'Proficiency in Infrastructure as Code using Terraform for multi-cloud environments.',
+    name: 'Engineering Degree — Computer Engineering & Statistics',
+    issuer: 'Polytech Lille (Université de Lille)',
+    date: '2014-09', // TODO: verify graduation date from LinkedIn
+    description:
+      "Master-level engineering degree (Diplôme d'ingénieur) in Computer Engineering and Statistics from Polytech Lille.",
   },
 ];
 
