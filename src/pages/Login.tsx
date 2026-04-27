@@ -4,7 +4,7 @@ import { motion } from 'framer-motion';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import { Lock, Mail, LogIn, AlertCircle } from 'lucide-react';
+import { Lock, Mail, LogIn, AlertCircle, RotateCcw } from 'lucide-react';
 import { useStore } from '../store';
 
 const loginSchema = z.object({
@@ -15,9 +15,10 @@ const loginSchema = z.object({
 type LoginFormData = z.infer<typeof loginSchema>;
 
 export default function Login() {
-  const { login } = useStore();
+  const { login, resetPasswordToBundled } = useStore();
   const navigate = useNavigate();
   const [loginError, setLoginError] = useState('');
+  const [resetNotice, setResetNotice] = useState('');
 
   const {
     register,
@@ -29,11 +30,26 @@ export default function Login() {
 
   const onSubmit = async (data: LoginFormData) => {
     setLoginError('');
-    const success = login(data.email, data.password);
+    setResetNotice('');
+    const success = await login(data.email, data.password);
     if (success) {
       navigate('/admin');
     } else {
       setLoginError('Invalid email or password. Please try again.');
+    }
+  };
+
+  const handleForgotPassword = () => {
+    if (
+      window.confirm(
+        'Reset the admin password to the default bundled with this deployment? This clears any password change saved in this browser.'
+      )
+    ) {
+      resetPasswordToBundled();
+      setLoginError('');
+      setResetNotice(
+        'Password reset to the default bundled with this deployment. Sign in with the credentials configured by the site owner.'
+      );
     }
   };
 
@@ -101,6 +117,14 @@ export default function Login() {
               </div>
             )}
 
+            {/* Reset notice */}
+            {resetNotice && (
+              <div className="flex items-start gap-2 p-3 bg-teal-500/10 border border-teal-500/30 rounded-xl text-teal-300 text-sm">
+                <RotateCcw size={16} className="mt-0.5 shrink-0" />
+                <span>{resetNotice}</span>
+              </div>
+            )}
+
             {/* Submit */}
             <button
               type="submit"
@@ -110,16 +134,24 @@ export default function Login() {
               <LogIn size={18} />
               {isSubmitting ? 'Signing in...' : 'Sign In'}
             </button>
+
+            <button
+              type="button"
+              onClick={handleForgotPassword}
+              className="w-full text-xs text-slate-400 hover:text-teal-400 transition-colors"
+            >
+              Forgot password? Reset to the default bundled with this deployment.
+            </button>
           </form>
 
           <div className="mt-6 p-4 bg-slate-700/50 rounded-xl text-center">
             <p className="text-xs text-slate-400 font-medium mb-1">Admin access</p>
             <p className="text-xs text-slate-300">
-              Credentials are configured via the
-              <code className="mx-1 px-1 py-0.5 rounded bg-slate-800 text-teal-300">VITE_ADMIN_EMAIL</code>
-              and
-              <code className="mx-1 px-1 py-0.5 rounded bg-slate-800 text-teal-300">VITE_ADMIN_PASSWORD</code>
-              environment variables at build time.
+              The bundled credentials live in
+              <code className="mx-1 px-1 py-0.5 rounded bg-slate-800 text-teal-300">src/data/auth.json</code>
+              (password stored as a SHA-256 hash). Once signed in you can change the password from
+              <code className="mx-1 px-1 py-0.5 rounded bg-slate-800 text-teal-300">/admin/password</code>
+              and export the updated file to commit it for the next deployment.
             </p>
           </div>
         </div>

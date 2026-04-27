@@ -2,6 +2,8 @@ import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import { Profile, SpeakerExperience, ProfessionalExperience, Certification } from '../types';
 import portfolioData from '../data/portfolio.json';
+import authData from '../data/auth.json';
+import { sha256Hex, timingSafeEqualHex } from '../lib/hash';
 
 // Default content is loaded from `src/data/portfolio.json`. That file is
 // committed to the repository, so the portfolio content is version-controlled
@@ -9,10 +11,20 @@ import portfolioData from '../data/portfolio.json';
 // the resulting JSON from the dashboard, replaces `src/data/portfolio.json`
 // with it, and commits & pushes.
 //
-// Admin credentials are read from build-time environment variables so they
-// can be defined or overridden when deploying the app:
-//   - VITE_ADMIN_EMAIL    (default: admin@portfolio.com)
-//   - VITE_ADMIN_PASSWORD (default: Admin@2024)
+// Admin credentials use the same git-based persistence pattern:
+//   - The admin email and the SHA-256 hash of the admin password live in
+//     `src/data/auth.json` (committed to the repo). Those are the values
+//     used by every fresh visitor / fresh deployment.
+//   - The admin can change the password from the /admin/password page; the
+//     new hash is kept in localStorage so it survives reloads on that
+//     device, and can be exported as `auth.json` to be committed and
+//     deployed for everyone else.
+//   - Build-time env vars still take precedence and override the bundled
+//     defaults (useful for one-off deployments or CI overrides):
+//       VITE_ADMIN_EMAIL          (overrides the bundled email)
+//       VITE_ADMIN_PASSWORD       (overrides the bundled hash with the
+//                                  SHA-256 hash of this plain-text value)
+//       VITE_ADMIN_PASSWORD_HASH  (overrides the bundled hash directly)
 
 const defaultProfile: Profile = portfolioData.profile as Profile;
 const defaultSpeakerExperiences: SpeakerExperience[] =
@@ -22,10 +34,43 @@ const defaultProfessionalExperiences: ProfessionalExperience[] =
 const defaultCertifications: Certification[] =
   portfolioData.certifications as Certification[];
 
-const ADMIN_EMAIL =
-  (import.meta.env.VITE_ADMIN_EMAIL as string | undefined) || 'admin@portfolio.com';
-const ADMIN_PASSWORD =
-  (import.meta.env.VITE_ADMIN_PASSWORD as string | undefined) || 'Admin@2024';
+const ENV_ADMIN_EMAIL = import.meta.env.VITE_ADMIN_EMAIL as string | undefined;
+const ENV_ADMIN_PASSWORD = import.meta.env.VITE_ADMIN_PASSWORD as string | undefined;
+const ENV_ADMIN_PASSWORD_HASH = import.meta.env.VITE_ADMIN_PASSWORD_HASH as string | undefined;
+
+const BUNDLED_ADMIN_EMAIL: string =
+  ENV_ADMIN_EMAIL || (authData.email as string) || 'admin@portfolio.com';
+
+/**
+ * Build-time bundled password hash. Resolved (in priority order) from:
+ *   1. `VITE_ADMIN_PASSWORD_HASH` (raw hex)
+ *   2. `VITE_ADMIN_PASSWORD` (hashed at module load)
+ *   3. `src/data/auth.json` `passwordHash` field
+ * The SHA-256 of the legacy default `Admin@2024` is kept as the ultimate
+ * fallback so the app still works in environments where `auth.json` is
+ * missing or empty.
+ */
+const FALLBACK_ADMIN_HASH =
+  'd3fc50c8f714cebd16d6c827826df01205bf519529f9d34775293cf9b70a420e';
+
+let BUNDLED_ADMIN_HASH: string =
+  ENV_ADMIN_PASSWORD_HASH ||
+  (authData.passwordHash as string | undefined) ||
+  FALLBACK_ADMIN_HASH;
+
+if (!ENV_ADMIN_PASSWORD_HASH && ENV_ADMIN_PASSWORD) {
+  // Hash the env-provided plain-text password lazily; until it resolves we
+  // keep the bundled hash so logins keep working.
+  void sha256Hex(ENV_ADMIN_PASSWORD).then((hash) => {
+    BUNDLED_ADMIN_HASH = hash;
+    // If no per-device override is set, the store's hash should track the
+    // env-provided one.
+    const current = useStore.getState();
+    if (!current.passwordHash) {
+      useStore.setState({ passwordHash: hash });
+    }
+  });
+}
 
 export interface PortfolioData {
   profile: Profile;
@@ -34,11 +79,33 @@ export interface PortfolioData {
   certifications: Certification[];
 }
 
+export interface AuthData {
+  email: string;
+  passwordHash: string;
+}
+
 interface AppState extends PortfolioData {
   isAuthenticated: boolean;
+  /** SHA-256 hex digest of the current admin password. Persisted locally
+   *  so password changes survive reloads on the same device. When empty /
+   *  null, the bundled `auth.json` hash is used. */
+  passwordHash: string | null;
 
-  login: (email: string, password: string) => boolean;
+  login: (email: string, password: string) => Promise<boolean>;
   logout: () => void;
+
+  /** Update the admin password. Requires the current password to match. */
+  setPassword: (currentPassword: string, newPassword: string) => Promise<boolean>;
+  /** Reset the admin password back to the value bundled in `auth.json`. */
+  resetPasswordToBundled: () => void;
+  /** Returns the current `auth.json` payload (email + password hash) ready
+   *  to be saved as `src/data/auth.json` and committed to git. */
+  exportAuth: () => string;
+  /** Replace the in-memory auth credentials with the provided data. */
+  importAuth: (data: AuthData) => void;
+  /** The admin email that the login form expects. */
+  getAdminEmail: () => string;
+
   updateProfile: (profile: Profile) => void;
   addSpeakerExperience: (exp: SpeakerExperience) => void;
   updateSpeakerExperience: (exp: SpeakerExperience) => void;
@@ -63,13 +130,17 @@ export const useStore = create<AppState>()(
   persist(
     (set, get) => ({
       isAuthenticated: false,
+      passwordHash: null,
       profile: defaultProfile,
       speakerExperiences: defaultSpeakerExperiences,
       professionalExperiences: defaultProfessionalExperiences,
       certifications: defaultCertifications,
 
-      login: (email: string, password: string) => {
-        if (email === ADMIN_EMAIL && password === ADMIN_PASSWORD) {
+      login: async (email: string, password: string) => {
+        if (email !== BUNDLED_ADMIN_EMAIL) return false;
+        const inputHash = await sha256Hex(password);
+        const expected = get().passwordHash || BUNDLED_ADMIN_HASH;
+        if (timingSafeEqualHex(inputHash, expected)) {
           set({ isAuthenticated: true });
           return true;
         }
@@ -77,6 +148,30 @@ export const useStore = create<AppState>()(
       },
 
       logout: () => set({ isAuthenticated: false }),
+
+      setPassword: async (currentPassword: string, newPassword: string) => {
+        const currentHash = await sha256Hex(currentPassword);
+        const expected = get().passwordHash || BUNDLED_ADMIN_HASH;
+        if (!timingSafeEqualHex(currentHash, expected)) return false;
+        const newHash = await sha256Hex(newPassword);
+        set({ passwordHash: newHash });
+        return true;
+      },
+
+      resetPasswordToBundled: () => set({ passwordHash: null }),
+
+      exportAuth: () => {
+        const data: AuthData = {
+          email: BUNDLED_ADMIN_EMAIL,
+          passwordHash: get().passwordHash || BUNDLED_ADMIN_HASH,
+        };
+        return JSON.stringify(data, null, 2);
+      },
+
+      importAuth: (data: AuthData) =>
+        set({ passwordHash: data.passwordHash }),
+
+      getAdminEmail: () => BUNDLED_ADMIN_EMAIL,
 
       updateProfile: (profile: Profile) => set({ profile }),
 
@@ -156,10 +251,13 @@ export const useStore = create<AppState>()(
     }),
     {
       name: 'speaker-portfolio-storage',
-      // Only persist authentication flag in localStorage. Portfolio content
-      // is sourced from the committed `portfolio.json` so updates pushed to
-      // git are picked up by every visitor on the next load.
-      partialize: (state) => ({ isAuthenticated: state.isAuthenticated }),
+      // Persist the auth flag and the per-device password hash override.
+      // Portfolio content stays sourced from the committed `portfolio.json`
+      // so updates pushed to git are picked up by every visitor on reload.
+      partialize: (state) => ({
+        isAuthenticated: state.isAuthenticated,
+        passwordHash: state.passwordHash,
+      }),
     }
   )
 );
