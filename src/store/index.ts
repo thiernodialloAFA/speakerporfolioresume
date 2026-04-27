@@ -67,7 +67,7 @@ function getBundledAdminHash(): Promise<string> {
   } else if (ENV_ADMIN_PASSWORD) {
     bundledAdminHashPromise = sha256Hex(ENV_ADMIN_PASSWORD);
   } else {
-    const fromFile = (authData.passwordHash as string | undefined) || FALLBACK_ADMIN_HASH;
+    const fromFile = authData.passwordHash || FALLBACK_ADMIN_HASH;
     bundledAdminHashPromise = Promise.resolve(fromFile.toLowerCase());
   }
   return bundledAdminHashPromise;
