@@ -35,10 +35,13 @@ jobs:
           # Serve under https://<user>.github.io/<repo>/ — base path must
           # match the repository name.
           VITE_BASE_PATH: /${{ github.event.repository.name }}/
-          # Override admin credentials at deploy time using repository secrets.
-          # If the secrets are not set the in-app defaults are used.
+          # Override admin credentials at deploy time using repository
+          # secrets. If unset, the values from src/data/auth.json are used
+          # (which can be rotated online from /admin/password and committed
+          # back to git for the next deployment).
           VITE_ADMIN_EMAIL: ${{ secrets.VITE_ADMIN_EMAIL }}
           VITE_ADMIN_PASSWORD: ${{ secrets.VITE_ADMIN_PASSWORD }}
+          VITE_ADMIN_PASSWORD_HASH: ${{ secrets.VITE_ADMIN_PASSWORD_HASH }}
         run: npm run build
 
       - name: Setup Pages

@@ -11,6 +11,7 @@ import EditProfile from './pages/admin/EditProfile';
 import ManageSpeaking from './pages/admin/ManageSpeaking';
 import ManageProfessional from './pages/admin/ManageProfessional';
 import ManageCertifications from './pages/admin/ManageCertifications';
+import ChangePassword from './pages/admin/ChangePassword';
 
 export default function App() {
   // BASE_URL is provided by Vite from `base` in vite.config.ts (driven by
@@ -64,6 +65,14 @@ export default function App() {
               element={
                 <ProtectedRoute>
                   <ManageCertifications />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/admin/password"
+              element={
+                <ProtectedRoute>
+                  <ChangePassword />
                 </ProtectedRoute>
               }
             />

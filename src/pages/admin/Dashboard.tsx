@@ -13,6 +13,7 @@ import {
   RotateCcw,
   CheckCircle2,
   AlertCircle,
+  KeyRound,
 } from 'lucide-react';
 import { useStore, PortfolioData } from '../../store';
 
@@ -131,6 +132,14 @@ export default function Dashboard() {
       color: 'amber',
       count: certifications.length,
     },
+    {
+      title: 'Change Password',
+      description: 'Set, update, or reset the admin login password',
+      to: '/admin/password',
+      icon: KeyRound,
+      color: 'rose',
+      count: null as number | null,
+    },
   ];
 
   const colorMap: Record<string, string> = {
@@ -138,6 +147,7 @@ export default function Dashboard() {
     indigo: 'bg-indigo-500/20 text-indigo-400 border-indigo-500/20',
     purple: 'bg-purple-500/20 text-purple-400 border-purple-500/20',
     amber: 'bg-amber-500/20 text-amber-400 border-amber-500/20',
+    rose: 'bg-rose-500/20 text-rose-400 border-rose-500/20',
   };
 
   return (
