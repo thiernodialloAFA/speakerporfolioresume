@@ -77,9 +77,9 @@ export default function ChangePassword() {
     );
   };
 
-  const handleExportAuth = () => {
+  const handleExportAuth = async () => {
     try {
-      const json = exportAuth();
+      const json = await exportAuth();
       const blob = new Blob([json], { type: 'application/json' });
       const url = URL.createObjectURL(blob);
       const link = document.createElement('a');
@@ -111,7 +111,7 @@ export default function ChangePassword() {
         !parsed ||
         typeof parsed !== 'object' ||
         typeof parsed.passwordHash !== 'string' ||
-        !/^[a-f0-9]{64}$/i.test(parsed.passwordHash)
+        !/^[a-fA-F0-9]{64}$/.test(parsed.passwordHash)
       ) {
         showFeedback(
           'error',
@@ -121,7 +121,7 @@ export default function ChangePassword() {
       }
       importAuth({
         email: typeof parsed.email === 'string' ? parsed.email : getAdminEmail(),
-        passwordHash: parsed.passwordHash,
+        passwordHash: parsed.passwordHash.toLowerCase(),
       });
       showFeedback('success', 'Auth credentials imported successfully.');
     } catch {

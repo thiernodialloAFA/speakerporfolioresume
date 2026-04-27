@@ -26,13 +26,17 @@ export async function sha256Hex(input: string): Promise<string> {
 
 /**
  * Constant-time equality check for two hex strings of the same length.
- * Avoids timing side-channels when comparing password hashes.
+ * Avoids timing side-channels when comparing password hashes. Inputs are
+ * normalised to lowercase first so case-mismatched but equivalent hex
+ * digests still compare equal.
  */
 export function timingSafeEqualHex(a: string, b: string): boolean {
   if (a.length !== b.length) return false;
+  const x = a.toLowerCase();
+  const y = b.toLowerCase();
   let diff = 0;
-  for (let i = 0; i < a.length; i++) {
-    diff |= a.charCodeAt(i) ^ b.charCodeAt(i);
+  for (let i = 0; i < x.length; i++) {
+    diff |= x.charCodeAt(i) ^ y.charCodeAt(i);
   }
   return diff === 0;
 }

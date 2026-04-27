@@ -42,34 +42,35 @@ const BUNDLED_ADMIN_EMAIL: string =
   ENV_ADMIN_EMAIL || (authData.email as string) || 'admin@portfolio.com';
 
 /**
- * Build-time bundled password hash. Resolved (in priority order) from:
- *   1. `VITE_ADMIN_PASSWORD_HASH` (raw hex)
- *   2. `VITE_ADMIN_PASSWORD` (hashed at module load)
- *   3. `src/data/auth.json` `passwordHash` field
- * The SHA-256 of the legacy default `Admin@2024` is kept as the ultimate
- * fallback so the app still works in environments where `auth.json` is
- * missing or empty.
+ * SHA-256 of the legacy default `Admin@2024`, kept as the ultimate fallback
+ * so the app still works in environments where `auth.json` is missing or
+ * empty.
  */
 const FALLBACK_ADMIN_HASH =
   'd3fc50c8f714cebd16d6c827826df01205bf519529f9d34775293cf9b70a420e';
 
-let BUNDLED_ADMIN_HASH: string =
-  ENV_ADMIN_PASSWORD_HASH ||
-  (authData.passwordHash as string | undefined) ||
-  FALLBACK_ADMIN_HASH;
-
-if (!ENV_ADMIN_PASSWORD_HASH && ENV_ADMIN_PASSWORD) {
-  // Hash the env-provided plain-text password lazily; until it resolves we
-  // keep the bundled hash so logins keep working.
-  void sha256Hex(ENV_ADMIN_PASSWORD).then((hash) => {
-    BUNDLED_ADMIN_HASH = hash;
-    // If no per-device override is set, the store's hash should track the
-    // env-provided one.
-    const current = useStore.getState();
-    if (!current.passwordHash) {
-      useStore.setState({ passwordHash: hash });
-    }
-  });
+/**
+ * Resolved (in priority order) from:
+ *   1. `VITE_ADMIN_PASSWORD_HASH` (raw hex)
+ *   2. `VITE_ADMIN_PASSWORD` (hashed lazily on first use)
+ *   3. `src/data/auth.json` `passwordHash` field
+ *   4. Hardcoded fallback hash (Admin@2024)
+ *
+ * Lazily resolved (memoised) so that the async hashing of an env-provided
+ * plain-text password cannot race with login attempts.
+ */
+let bundledAdminHashPromise: Promise<string> | null = null;
+function getBundledAdminHash(): Promise<string> {
+  if (bundledAdminHashPromise) return bundledAdminHashPromise;
+  if (ENV_ADMIN_PASSWORD_HASH) {
+    bundledAdminHashPromise = Promise.resolve(ENV_ADMIN_PASSWORD_HASH.toLowerCase());
+  } else if (ENV_ADMIN_PASSWORD) {
+    bundledAdminHashPromise = sha256Hex(ENV_ADMIN_PASSWORD);
+  } else {
+    const fromFile = (authData.passwordHash as string | undefined) || FALLBACK_ADMIN_HASH;
+    bundledAdminHashPromise = Promise.resolve(fromFile.toLowerCase());
+  }
+  return bundledAdminHashPromise;
 }
 
 export interface PortfolioData {
@@ -100,7 +101,7 @@ interface AppState extends PortfolioData {
   resetPasswordToBundled: () => void;
   /** Returns the current `auth.json` payload (email + password hash) ready
    *  to be saved as `src/data/auth.json` and committed to git. */
-  exportAuth: () => string;
+  exportAuth: () => Promise<string>;
   /** Replace the in-memory auth credentials with the provided data. */
   importAuth: (data: AuthData) => void;
   /** The admin email that the login form expects. */
@@ -139,7 +140,7 @@ export const useStore = create<AppState>()(
       login: async (email: string, password: string) => {
         if (email !== BUNDLED_ADMIN_EMAIL) return false;
         const inputHash = await sha256Hex(password);
-        const expected = get().passwordHash || BUNDLED_ADMIN_HASH;
+        const expected = get().passwordHash || (await getBundledAdminHash());
         if (timingSafeEqualHex(inputHash, expected)) {
           set({ isAuthenticated: true });
           return true;
@@ -151,7 +152,7 @@ export const useStore = create<AppState>()(
 
       setPassword: async (currentPassword: string, newPassword: string) => {
         const currentHash = await sha256Hex(currentPassword);
-        const expected = get().passwordHash || BUNDLED_ADMIN_HASH;
+        const expected = get().passwordHash || (await getBundledAdminHash());
         if (!timingSafeEqualHex(currentHash, expected)) return false;
         const newHash = await sha256Hex(newPassword);
         set({ passwordHash: newHash });
@@ -160,16 +161,16 @@ export const useStore = create<AppState>()(
 
       resetPasswordToBundled: () => set({ passwordHash: null }),
 
-      exportAuth: () => {
+      exportAuth: async () => {
         const data: AuthData = {
           email: BUNDLED_ADMIN_EMAIL,
-          passwordHash: get().passwordHash || BUNDLED_ADMIN_HASH,
+          passwordHash: get().passwordHash || (await getBundledAdminHash()),
         };
         return JSON.stringify(data, null, 2);
       },
 
       importAuth: (data: AuthData) =>
-        set({ passwordHash: data.passwordHash }),
+        set({ passwordHash: data.passwordHash.toLowerCase() }),
 
       getAdminEmail: () => BUNDLED_ADMIN_EMAIL,
 
